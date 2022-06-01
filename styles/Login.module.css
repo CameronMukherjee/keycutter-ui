@@ -1,0 +1,14 @@
+.paperStyle {
+  padding: 20px;
+  height: auto;
+  width: 400px;
+  margin: 20px auto;
+}
+
+.lockIcon {
+  background-color: #0070f3;
+}
+
+.textField {
+  margin-bottom: 15px;
+}
