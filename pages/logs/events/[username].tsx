@@ -1,13 +1,12 @@
-import KcPage from "../../component/KcPage";
+import KcPage from "../../../component/KcPage";
 import {useEffect, useState} from "react";
-import {KcDataGridUserRow} from "../../types/KcUser";
 import axios from "axios";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import Image from "next/image";
 import {useCookies} from "react-cookie";
 import {useRouter} from "next/router";
 
-const Login = () => {
+const EventsByUsername = () => {
   const router = useRouter();
   const [cookies, setCookie] = useCookies(['access_token']);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,11 +15,13 @@ const Login = () => {
   const [pageSize, setPageSize] = useState(25);
   const [totalRows, setTotalRows] = useState(0);
 
+  const query = router.query;
+
   // Fetches users on page load.
   useEffect(() => {
     setIsLoading(true);
 
-    axios.get(`http://localhost:7314/operations/logs/login?page=${pageNo}&size=${pageSize}`, {
+    axios.get(`http://localhost:7314/operations/logs/events/username/${query.username}?page=${pageNo}&size=${pageSize}`, {
       headers: {
         "Authorization": `Bearer ${cookies.access_token}`
       }
@@ -36,16 +37,23 @@ const Login = () => {
         router.push("/");
       }
     })
-  }, [pageNo, pageSize, cookies.access_token, router])
+  }, [pageNo, pageSize, cookies.access_token, router, query])
 
   const columns: GridColDef[] = [
     {
       field: 'uid',
-      headerName: 'Login Log Uid',
-      description: "The login logs unique identifier",
+      headerName: 'Event Log Uid',
+      description: "The logs unique identifier",
       sortable: true,
       filterable: true,
       width: 300
+    },
+    {
+      field: 'userUid',
+      headerName: 'User Uid',
+      description: "This is the users unique identifier",
+      sortable: true,
+      width: 300,
     },
     {
       field: 'username',
@@ -62,8 +70,8 @@ const Login = () => {
       width: 290
     },
     {
-      field: 'loginResult',
-      headerName: "Login Result",
+      field: 'eventType',
+      headerName: "Event Type",
       filterable: true,
       sortable: false,
       width: 300,
@@ -77,8 +85,9 @@ const Login = () => {
   ];
 
   return (
-      <KcPage title={"Login Logs"}>
+      <KcPage title={"Event Logs"}>
         <div style={{height: "100vh", width: "100%"}}>
+
           {isLoading ?
               <Image
                   src={"/loading.gif"}
@@ -105,4 +114,4 @@ const Login = () => {
   )
 }
 
-export default Login;
+export default EventsByUsername;

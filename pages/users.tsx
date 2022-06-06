@@ -1,16 +1,15 @@
 import KcPage from "../component/KcPage";
-import {DataGrid, GridColDef, GridSelectionModel} from '@mui/x-data-grid';
+import {DataGrid, GridColDef} from '@mui/x-data-grid';
 import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import Image from 'next/image';
 import axios from "axios";
-import {CheckBox, DoNotDisturb} from "@mui/icons-material";
 import Dialog from "@mui/material/Dialog";
 import {
   Button,
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle,
+  DialogTitle, Grid, List, ListItem, ListItemText, Table, TableBody, TableCell, TableHead, TableRow,
   TextField,
   Typography
 } from "@mui/material";
@@ -19,6 +18,8 @@ import styles from '../styles/Users.module.css';
 import {inspect} from "util";
 import Moment from "react-moment";
 import 'moment-timezone';
+import {router} from "next/client";
+import {useRouter} from "next/router";
 
 const Users = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +75,14 @@ const Users = () => {
       headerName: "Roles",
       filterable: true,
       sortable: false,
-      width: 240,
+      width: 85,
+      valueGetter: (params) => {
+        if (params.row.roles == null) {
+          return 0;
+        }
+
+        return params.row.roles.length;
+      }
     },
     {
       field: 'isDisabled',
@@ -122,13 +130,15 @@ const Users = () => {
                   pagination
               />
           }
-          {modalViewable && userModal(modalInformation, setModalViewable)}
+          {modalViewable && UserModal(modalInformation, setModalViewable)}
         </div>
       </KcPage>
   )
 }
 
-const userModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatch<SetStateAction<boolean>>) => {
+const UserModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatch<SetStateAction<boolean>>) => {
+
+  const router = useRouter();
 
   return (
       <Dialog
@@ -137,68 +147,95 @@ const userModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatc
           open={true}
           onClose={() => isModalViewable(false)}>
         {user &&
-        <>
-          <DialogContent>
-            <DialogContentText>
-              <TextField
-                  className={styles.textField}
-                  label={"Username (Email)"}
-                  id={"username"}
-                  value={user.row.username}
-                  fullWidth
-                  disabled
-              />
-              <TextField
-                  className={styles.textField}
-                  label={"External Reference"}
-                  id={"externalReference"}
-                  value={user.row.externalReference}
-                  fullWidth
-                  disabled
-              />
-              <TextField
-                  className={styles.textField}
-                  label={"State"}
-                  id={"isDisabled"}
-                  value={user.row.isDisabled ? "DISABLED" : "ACTIVE"}
-                  fullWidth
-                  disabled
-              />
-              <TextField
-                  className={styles.textField}
-                  label={"Roles"}
-                  id={"roles"}
-                  value={user.row.roles}
-                  fullWidth
-                  disabled
-              />
-              <TextField
-                  className={styles.textField}
-                  label={"Updated At"}
-                  id={"updatedAt"}
-                  value={user.row.updatedAt}
-                  fullWidth
-                  disabled
-              />
-              <TextField
-                  className={styles.textField}
-                  label={"Created At"}
-                  id={"createdAt"}
-                  value={user.row.createdAt}
-                  fullWidth
-                  disabled
-              />
-            </DialogContentText>
-            {/*@ts-ignore*/}
-            <div align={"right"}>
-              <b>Updated: <Moment fromNow>{user.row.updatedAt}</Moment></b> <br/>
-              <b>Created: <Moment fromNow>{user.row.createdAt}</Moment></b>
-            </div>
-          </DialogContent>
-        </>
+            <>
+              {/*@ts-ignore*/}
+              <DialogTitle className={styles.textField} align={"center"}>
+                <Typography variant={"h4"}>
+                  {user.row.username}
+                </Typography>
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  <br/>
+                  <TextField
+                      className={styles.textField}
+                      label={"User Uid"}
+                      id={"userUid"}
+                      value={user.id}
+                      fullWidth
+                      disabled
+                  />
+                  <TextField
+                      className={styles.textField}
+                      label={"External Reference"}
+                      id={"externalReference"}
+                      value={user.row.externalReference}
+                      fullWidth
+                      disabled
+                  />
+                  <TextField
+                      className={styles.textField}
+                      label={"State"}
+                      id={"isDisabled"}
+                      value={user.row.isDisabled ? "DISABLED" : "ACTIVE"}
+                      fullWidth
+                      disabled
+                  />
+                  <TextField
+                      className={styles.textField}
+                      label={"Roles"}
+                      id={"roles"}
+                      value={user.row.roles || "NONE"}
+                      fullWidth
+                      disabled
+                  />
+                  <TextField
+                      className={styles.textField}
+                      label={"Updated At"}
+                      id={"updatedAt"}
+                      value={user.row.updatedAt}
+                      fullWidth
+                      disabled
+                  />
+                  <TextField
+                      className={styles.textField}
+                      label={"Created At"}
+                      id={"createdAt"}
+                      value={user.row.createdAt}
+                      fullWidth
+                      disabled
+                  />
+                </DialogContentText>
+                <Grid container spacing={2}>
+                  {/*@ts-ignore*/}
+                  <Grid item xs={6} align={"left"}>
+                    <Button variant={"contained"} className={styles.button} onClick={() => {
+                    router.push({
+                      pathname: '/logs/events/[username]',
+                      query: {username: user.row.username}
+                    })}}>
+                      View Event Logs
+                    </Button>
+                    <Button variant={"contained"} className={styles.button} onClick={() => {
+                    router.push({
+                      pathname: '/logs/login/[username]',
+                      query: {username: user.row.username}
+                    })}}>
+                      View Login Logs
+                    </Button>
+                  </Grid>
+                  {/*@ts-ignore*/}
+                  <Grid item xs={6} align={"right"}>
+                    <b>Updated: <Moment fromNow>{user.row.updatedAt}</Moment></b> <br/>
+                    <b>Created: <Moment fromNow>{user.row.createdAt}</Moment></b>
+                  </Grid>
+                </Grid>
+                {/*@ts-ignore*/}
+              </DialogContent>
+            </>
         }
         <DialogActions>
-          <Button onClick={() => isModalViewable(false)}>Close</Button>
+          <Button variant={"outlined"} onClick={() => isModalViewable(false)}>Close</Button>
         </DialogActions>
       </Dialog>
   );

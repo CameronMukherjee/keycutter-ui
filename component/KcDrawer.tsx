@@ -6,7 +6,7 @@ import {
   FindInPage,
   GraphicEq,
   Group,
-  Home,
+  Home, Hub,
   Receipt,
   VerifiedUser
 } from "@mui/icons-material";
@@ -25,6 +25,11 @@ const KcDrawer = () => {
       text: 'Analytics',
       icon: <BarChart color={"secondary"}/>,
       path: '/analytics'
+    },
+    {
+      text: "Webhooks",
+      icon: <Hub color={"secondary"}/>,
+      path: "/webhook"
     },
     {
       text: 'Event Logs',

@@ -1,17 +1,13 @@
-import KcPage from "../../component/KcPage";
-import {useEffect, useState} from "react";
-import {KcDataGridUserRow} from "../../types/KcUser";
-import axios from "axios";
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import KcPage from "../component/KcPage";
 import Image from "next/image";
-import {useCookies} from "react-cookie";
-import {useRouter} from "next/router";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {useEffect, useState} from "react";
+import {KcDataGridUserRow} from "../types/KcUser";
+import axios from "axios";
 
-const Events = () => {
-  const router = useRouter();
-  const [cookies, setCookie] = useCookies(['access_token']);
+const Webhook = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [logs, setLogs] = useState([]);
+  const [users, setUsers] = useState([]);
   const [pageNo, setPageNo] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [totalRows, setTotalRows] = useState(0);
@@ -20,60 +16,64 @@ const Events = () => {
   useEffect(() => {
     setIsLoading(true);
 
-    axios.get(`http://localhost:7314/operations/logs/events?page=${pageNo}&size=${pageSize}`, {
-      headers: {
-        "Authorization": `Bearer ${cookies.access_token}`
-      }
-    })
+    axios.get(`http://localhost:7314/webhook?page=${pageNo}&size=${pageSize}`)
     .then((res) => {
-      setLogs(res.data.content);
+      console.log(res)
+      setUsers(res.data.content);
       setTotalRows(res.data.totalSize);
       setIsLoading(false);
     })
     .catch((err) => {
-      console.log(err);
-      if (err.response.status === 401) {
-        router.push("/");
-      }
+      console.log(err)
     })
-  }, [pageNo, pageSize, cookies.access_token, router])
+  }, [pageNo, pageSize])
 
   const columns: GridColDef[] = [
     {
       field: 'uid',
-      headerName: 'Event Log Uid',
-      description: "The logs unique identifier",
+      headerName: 'Webhook Uid',
+      description: "The webhooks uid",
       sortable: true,
       filterable: true,
       width: 300
     },
     {
-      field: 'userUid',
-      headerName: 'User Uid',
-      description: "This is the users unique identifier",
+      field: 'webhookUrl',
+      headerName: 'Webhook Url',
+      description: "The webhooks url",
       sortable: true,
-      width: 300,
+      width: 450,
     },
     {
-      field: 'username',
-      headerName: 'Username (Email)',
-      description: "The users username (email) within KeyCutter",
+      field: 'registeredEvents',
+      headerName: 'Registered Events',
+      description: "The events that will be dispatched to this webhook",
       sortable: true,
-      width: 290
+      width: 140,
+      valueGetter: (params) => {
+       if (params.row.registeredEvents == null) {
+         return 0;
+       }
+
+       return params.row.registeredEvents.length;
+      }
     },
     {
-      field: 'externalReference',
-      headerName: 'External Reference',
-      description: "The users external reference (usually a reference to your database)",
-      sortable: true,
-      width: 290
-    },
-    {
-      field: 'eventType',
-      headerName: "Event Type",
+      field: 'lastDispatch',
+      headerName: "Last Dispatch",
+      description: "The last time a message was dispatched to this webhook",
       filterable: true,
       sortable: false,
-      width: 300,
+      width: 240,
+    },
+    {
+      field: 'isDisabled',
+      headerName: 'State',
+      description: "Is the account currently disabled or active?",
+      type: 'number',
+      sortable: true,
+      width: 100,
+      valueGetter: (params) => params.row.isDisabled ? "DISABLED" : "ACTIVE"
     },
     {
       field: 'createdAt',
@@ -84,7 +84,7 @@ const Events = () => {
   ];
 
   return (
-      <KcPage title={"Event Logs"}>
+      <KcPage title={"Webhook Management"}>
         <div style={{height: "100vh", width: "100%"}}>
           {isLoading ?
               <Image
@@ -94,7 +94,7 @@ const Events = () => {
               :
               <DataGrid
                   paginationMode={"server"}
-                  rows={logs}
+                  rows={users}
                   columns={columns}
                   getRowId={(row) => row.uid}
                   rowsPerPageOptions={[25, 50, 100]}
@@ -112,4 +112,4 @@ const Events = () => {
   )
 }
 
-export default Events;
+export default Webhook;
