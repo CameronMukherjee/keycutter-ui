@@ -1,17 +1,21 @@
 import {Drawer, List, ListItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
 import styles from '../styles/component/KcDrawer.module.css'
-import {BarChart, DocumentScanner, FindInPage, GraphicEq, Group, Home, VerifiedUser} from "@mui/icons-material";
+import {
+  BarChart,
+  DocumentScanner,
+  FindInPage,
+  GraphicEq,
+  Group,
+  Home,
+  Receipt,
+  VerifiedUser
+} from "@mui/icons-material";
 import {useRouter} from "next/router";
 
 const KcDrawer = () => {
   const router = useRouter();
 
   const menuItems = [
-    {
-      text: "Home",
-      icon: <Home color={"secondary"}/>,
-      path: "/dashboard"
-    },
     {
       text: 'User Management',
       icon: <Group color={"secondary"}/>,
@@ -23,9 +27,14 @@ const KcDrawer = () => {
       path: '/analytics'
     },
     {
-      text: 'Logs',
+      text: 'Event Logs',
+      icon: <Receipt color={"secondary"}/>,
+      path: "/logs/events"
+    },
+    {
+      text: 'Login Logs',
       icon: <FindInPage color={"secondary"}/>,
-      path: "/logs"
+      path: "/logs/login"
     }
   ];
 

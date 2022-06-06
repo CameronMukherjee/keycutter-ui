@@ -1,35 +1,59 @@
 import KcPage from "../component/KcPage";
-import {DataGrid, GridColDef} from '@mui/x-data-grid';
-import {useEffect, useState} from "react";
+import {DataGrid, GridColDef, GridSelectionModel} from '@mui/x-data-grid';
+import {Dispatch, SetStateAction, useEffect, useState} from "react";
 import Image from 'next/image';
 import axios from "axios";
 import {CheckBox, DoNotDisturb} from "@mui/icons-material";
+import Dialog from "@mui/material/Dialog";
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography
+} from "@mui/material";
+import {KcDataGridUserRow, KcUser} from "../types/KcUser";
+import styles from '../styles/Users.module.css';
+import {inspect} from "util";
+import Moment from "react-moment";
+import 'moment-timezone';
 
 const Users = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState([]);
+  const [pageNo, setPageNo] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [totalRows, setTotalRows] = useState(0);
+
+  const [modalInformation, setModalInformation] = useState<KcDataGridUserRow>();
+  const [modalViewable, setModalViewable] = useState(false);
 
   // Fetches users on page load.
   useEffect(() => {
-    axios.get("http://localhost:7314/users?limit=50")
+    setIsLoading(true);
+
+    axios.get(`http://localhost:7314/users?page=${pageNo}&size=${pageSize}`)
     .then((res) => {
       console.log(res)
-      setUsers(res.data);
+      setUsers(res.data.content);
+      setTotalRows(res.data.totalSize);
       setIsLoading(false);
     })
     .catch((err) => {
       console.log(err)
     })
-  }, [])
+  }, [pageNo, pageSize])
 
   const columns: GridColDef[] = [
     {
       field: 'userUid',
-      headerName: ' User Uid',
-      description: "The users unique identifer within KeyCutter",
+      headerName: 'User Uid',
+      description: "The users unique identifier within KeyCutter",
       sortable: true,
       filterable: true,
-      width: 290
+      width: 300
     },
     {
       field: 'username',
@@ -46,44 +70,138 @@ const Users = () => {
       width: 290
     },
     {
+      field: 'roles',
+      headerName: "Roles",
+      filterable: true,
+      sortable: false,
+      width: 240,
+    },
+    {
       field: 'isDisabled',
       headerName: 'State',
       description: "Is the account currently disabled or active?",
       type: 'number',
       sortable: true,
-      width: 90,
+      width: 100,
       valueGetter: (params) => params.row.isDisabled ? "DISABLED" : "ACTIVE"
     },
     {
       field: 'createdAt',
       headerName: 'Created At',
       sortable: true,
-      width: 230,
+      width: 230
     }
   ];
 
   return (
       <KcPage title={"User Management"}>
-        <div style={{ height: "100vh", width: '100%' }}>
+        <div style={{height: "100vh", width: "100%"}}>
           {isLoading ?
-            <Image
-              src={"/loading.gif"}
-              layout={"fill"}
-              alt={"A loading animation"}
-            />
-            :
-            <DataGrid
-                rows={users}
-                columns={columns}
-                pageSize={50}
-                getRowId={(row) => row.userUid}
-                rowsPerPageOptions={[50, 100, 150, 500]}
-                disableSelectionOnClick
-            />
+              <Image
+                  src={"/loading.gif"}
+                  layout={"fill"}
+                  alt={"A loading animation"}/>
+              :
+              <DataGrid
+                  paginationMode={"server"}
+                  rows={users}
+                  columns={columns}
+                  getRowId={(row) => row.userUid}
+                  rowsPerPageOptions={[25, 50, 100]}
+                  rowCount={totalRows}
+                  pageSize={pageSize}
+                  onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                  page={pageNo}
+                  onPageChange={(newPage) => setPageNo(newPage)}
+                  onRowClick={(row) => {
+                    setModalViewable(true);
+                    // @ts-ignore
+                    setModalInformation(row);
+                    console.log(row);
+                  }}
+                  pagination
+              />
           }
+          {modalViewable && userModal(modalInformation, setModalViewable)}
         </div>
       </KcPage>
   )
+}
+
+const userModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatch<SetStateAction<boolean>>) => {
+
+  return (
+      <Dialog
+          fullWidth={true}
+          maxWidth={"lg"}
+          open={true}
+          onClose={() => isModalViewable(false)}>
+        {user &&
+        <>
+          <DialogContent>
+            <DialogContentText>
+              <TextField
+                  className={styles.textField}
+                  label={"Username (Email)"}
+                  id={"username"}
+                  value={user.row.username}
+                  fullWidth
+                  disabled
+              />
+              <TextField
+                  className={styles.textField}
+                  label={"External Reference"}
+                  id={"externalReference"}
+                  value={user.row.externalReference}
+                  fullWidth
+                  disabled
+              />
+              <TextField
+                  className={styles.textField}
+                  label={"State"}
+                  id={"isDisabled"}
+                  value={user.row.isDisabled ? "DISABLED" : "ACTIVE"}
+                  fullWidth
+                  disabled
+              />
+              <TextField
+                  className={styles.textField}
+                  label={"Roles"}
+                  id={"roles"}
+                  value={user.row.roles}
+                  fullWidth
+                  disabled
+              />
+              <TextField
+                  className={styles.textField}
+                  label={"Updated At"}
+                  id={"updatedAt"}
+                  value={user.row.updatedAt}
+                  fullWidth
+                  disabled
+              />
+              <TextField
+                  className={styles.textField}
+                  label={"Created At"}
+                  id={"createdAt"}
+                  value={user.row.createdAt}
+                  fullWidth
+                  disabled
+              />
+            </DialogContentText>
+            {/*@ts-ignore*/}
+            <div align={"right"}>
+              <b>Updated: <Moment fromNow>{user.row.updatedAt}</Moment></b> <br/>
+              <b>Created: <Moment fromNow>{user.row.createdAt}</Moment></b>
+            </div>
+          </DialogContent>
+        </>
+        }
+        <DialogActions>
+          <Button onClick={() => isModalViewable(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+  );
 }
 
 export default Users;
