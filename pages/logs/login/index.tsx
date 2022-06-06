@@ -1,6 +1,5 @@
 import KcPage from "../../../component/KcPage";
 import {useEffect, useState} from "react";
-import {KcDataGridUserRow} from "../../../types/KcUser";
 import axios from "axios";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import Image from "next/image";
@@ -70,7 +69,7 @@ const Login = () => {
     },
     {
       field: 'createdAt',
-      headerName: 'Created At',
+      headerName: 'Attempt At',
       sortable: true,
       width: 230
     }

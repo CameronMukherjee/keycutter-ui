@@ -165,7 +165,7 @@ const Users = () => {
 }
 
 const UserModal = (user: KcDataGridUserRow | undefined,
-                   isModalViewable: Dispatch<SetStateAction<boolean>>,
+                   setModalVisible: Dispatch<SetStateAction<boolean>>,
                    newRole: string,
                    setNewRole: Dispatch<SetStateAction<string>>,
                    handleNewRole: () => void,
@@ -224,15 +224,15 @@ const UserModal = (user: KcDataGridUserRow | undefined,
           fullWidth={true}
           maxWidth={"lg"}
           open={true}
-          onClose={() => isModalViewable(false)}>
+          onClose={() => setModalVisible(false)}>
         {user &&
             <>
               <DialogContent>
                 <DialogContentText>
                   <Grid container spacing={2}>
                     {/*@ts-ignore*/}
-                    <Grid item md={6} align={"center"}>
-                      <ButtonGroup variant={"contained"} size={"large"}>
+                    <Grid item md={6}>
+                      <ButtonGroup variant={"outlined"} size={"large"}>
                         <Button variant={"contained"} onClick={() => {
                           router.push({
                             pathname: '/logs/events/[username]',
@@ -252,8 +252,8 @@ const UserModal = (user: KcDataGridUserRow | undefined,
                       </ButtonGroup>
                     </Grid>
                     {/*@ts-ignore*/}
-                    <Grid item md={6} align={"center"}>
-                      <ButtonGroup variant={"contained"} size={"large"}>
+                    <Grid item md={6} align={"right"}>
+                      <ButtonGroup variant={"outlined"} size={"large"}>
                         {user.row.isDisabled ?
                             <Button variant={"contained"} onClick={handleEnable}>
                               Enable Account
@@ -385,7 +385,7 @@ const UserModal = (user: KcDataGridUserRow | undefined,
             </>
         }
         <DialogActions>
-          <Button variant={"outlined"} onClick={() => isModalViewable(false)}>Close</Button>
+          <Button variant={"outlined"} onClick={() => setModalVisible(false)}>Close</Button>
         </DialogActions>
       </Dialog>
   );

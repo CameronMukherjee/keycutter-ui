@@ -71,7 +71,7 @@ const LoginLogsByUsername = () => {
     },
     {
       field: 'createdAt',
-      headerName: 'Created At',
+      headerName: 'Attempt At',
       sortable: true,
       width: 230
     }
