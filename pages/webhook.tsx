@@ -3,7 +3,7 @@ import Image from "next/image";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {Dispatch, FormEvent, SetStateAction, useEffect, useState} from "react";
 import axios from "axios";
-import {NextRouter, useRouter} from "next/router";
+import {useRouter} from "next/router";
 import {
   Box,
   Button,
@@ -12,6 +12,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
+  Fab,
   FormControl,
   Grid,
   InputLabel,
@@ -25,6 +26,7 @@ import Dialog from "@mui/material/Dialog";
 import styles from '../styles/Webhook.module.css';
 import Moment from "react-moment";
 import 'moment-timezone';
+import {Add} from "@mui/icons-material";
 
 const Webhook = () => {
   const router = useRouter();
@@ -38,6 +40,12 @@ const Webhook = () => {
   const [modalViewable, setModalViewable] = useState(false);
   const [webhookInfo, setWebhookInfo] = useState({});
   const [events, setEvents] = useState<string[]>([]);
+
+  const [newWebhookModalVisible, setNewWebhookModalVisible] = useState(false);
+  // Refers to modal for creating a new webhook.
+  const [newWebhookEvents, setNewWebhookEvents] = useState<string[]>([]);
+  const [webhookUrl, setWebhookUrl] = useState('');
+
 
   // Fetches users on page load.
   useEffect(() => {
@@ -54,6 +62,22 @@ const Webhook = () => {
       console.log(err)
     })
   }, [pageNo, pageSize])
+
+  const handleNewWebhook = () => {
+    const data = {
+      webhookUrl: webhookUrl,
+      registeredEvents: newWebhookEvents
+    }
+
+    axios.post(`http://localhost:7314/webhook`, data)
+    .then(res => {
+      console.log(res)
+      router.reload();
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
 
   const handleNewRegisteredEvents = (e: FormEvent) => {
     e.preventDefault();
@@ -147,6 +171,7 @@ const Webhook = () => {
       filterable: true,
       sortable: false,
       width: 240,
+      valueGetter: (params) => params.row.lastDispatch || "NONE"
     },
     {
       field: 'isDisabled',
@@ -167,6 +192,10 @@ const Webhook = () => {
 
   return (
       <KcPage title={"Webhook Management"}>
+        <Fab color={"primary"} aria-label={"add"} className={styles.fob}
+             onClick={() => setNewWebhookModalVisible(true)}>
+          <Add/>
+        </Fab>
         <div style={{height: '100%'}}>
           {isLoading ?
               <Image
@@ -195,7 +224,6 @@ const Webhook = () => {
               />
           }
           {modalViewable && ViewWebhookModal(webhookInfo,
-              router,
               handleNewRegisteredEvents,
               setModalViewable,
               events,
@@ -203,13 +231,122 @@ const Webhook = () => {
               handleDeleteWebhook,
               handleDisableWebhook,
               handleEnableWebhook)}
+          {newWebhookModalVisible && NewWebhookModal(setNewWebhookModalVisible, webhookUrl, setWebhookUrl, newWebhookEvents, setNewWebhookEvents, handleNewWebhook)}
         </div>
       </KcPage>
   )
 }
 
+const NewWebhookModal = (setNewWebhookModalVisible: Dispatch<SetStateAction<boolean>>,
+                         webhookUrl: string,
+                         setWebhookUrl: Dispatch<SetStateAction<string>>,
+                         events: any,
+                         setEvents: Dispatch<SetStateAction<string[]>>,
+                         handleNewWebhook: () => void) => {
+
+
+  const eventTypes = [
+    'USER_CREATED',
+    'USER_UPDATED',
+    'USER_PASSWORD_CHANGE',
+    'USER_DELETED',
+    'USER_DISABLED',
+    'USER_ENABLED',
+    'USER_RESET_PASSWORD',
+    'ROLE_APPENDED',
+    'ROLE_REMOVED',
+    'ROLES_REMOVED',
+    'WELCOME_EMAIL_DISPATCHED',
+    'FORGOTTEN_PASSWORD_EMAIL_DISPATCHED'];
+
+  const ITEM_HEIGHT = 60;
+  const ITEM_PADDING_TOP = 50;
+  const menuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
+
+  const handleChange = (event: SelectChangeEvent<typeof events>) => {
+    const {
+      target: {value},
+    } = event;
+    setEvents(
+        // On autofill we get a stringified value.
+        //@ts-ignore
+        typeof value === 'string' ? value.split(',') : value,
+    );
+  };
+
+
+  return (
+      <Dialog
+          fullWidth={true}
+          maxWidth={"lg"}
+          open={true}
+          onClose={() => setNewWebhookModalVisible(false)}>
+        <>
+          <DialogContent>
+            <DialogContentText>
+              <Box component={"form"} style={{marginTop: 10}}>
+                <TextField
+                    className={styles.textField}
+                    label={"Webhook URL"}
+                    id={"url"}
+                    value={webhookUrl}
+                    onChange={(e) => setWebhookUrl(e.target.value)}
+                    fullWidth
+                />
+              </Box>
+            </DialogContentText>
+            <FormControl style={{width: '100%'}}>
+              <InputLabel id="registered-events-label">
+                Events
+              </InputLabel>
+              <Select
+                  labelId="registered-events-label"
+                  id="registered-events-chip"
+                  multiple
+                  value={events || []}
+                  onChange={handleChange}
+                  input={<OutlinedInput id="select-multiple-chip" label="Chip"/>}
+                  renderValue={(selected) => (
+                      <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
+                        {selected.map((value: string) => (
+                            <Chip key={value} label={value}/>
+                        ))}
+                      </Box>
+                  )}
+                  MenuProps={menuProps}>
+                {eventTypes.map((name) => (
+                    <MenuItem
+                        key={name}
+                        value={name}>
+                      {name}
+                    </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Grid container style={{marginTop: 15, width: '100%'}}>
+              <Grid item md={12}>
+                <Button variant={"contained"} onClick={handleNewWebhook} style={{width: "100%"}}>
+                  Save and Activate Webhook
+                </Button>
+              </Grid>
+            </Grid>
+          </DialogContent>
+        </>
+        <DialogActions>
+          <Button variant={"outlined"} onClick={() => setNewWebhookModalVisible(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+  )
+}
+
 const ViewWebhookModal = (webhookInfo: any,
-                          router: NextRouter,
                           handleNewRegisteredEvents: (e: FormEvent) => void,
                           setModalViewable: Dispatch<SetStateAction<boolean>>,
                           events: string[],
@@ -313,7 +450,7 @@ const ViewWebhookModal = (webhookInfo: any,
                         className={styles.textField}
                         label={"Last Dispatch"}
                         id={"lastDispatch"}
-                        value={webhookInfo.lastDispatch}
+                        value={webhookInfo.lastDispatch || "NONE"}
                         fullWidth
                         disabled
                     />
@@ -365,7 +502,9 @@ const ViewWebhookModal = (webhookInfo: any,
                 </Grid>
                 {/*@ts-ignore*/}
                 <div align={"right"} style={{marginTop: 5}}>
-                  <b>Last Dispatch: <Moment fromNow>{webhookInfo.lastDispatch}</Moment></b>
+                  {webhookInfo.lastDispatch &&
+                      <b>Last Dispatch: <Moment fromNow>{webhookInfo.lastDispatch}</Moment></b>
+                  }
                   <br/>
                   <b>Created: <Moment fromNow>{webhookInfo.createdAt}</Moment></b>
                 </div>

@@ -1,6 +1,6 @@
 import {Drawer, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
 import styles from '../styles/component/KcDrawer.module.css'
-import {AcUnit, BarChart, FindInPage, Group, Hub, Receipt, Settings,} from "@mui/icons-material";
+import {AcUnit, BarChart, FindInPage, Group, Hub, Receipt, Search, Settings,} from "@mui/icons-material";
 import {useRouter} from "next/router";
 
 const KcDrawer = () => {
@@ -8,38 +8,43 @@ const KcDrawer = () => {
 
   const menuItems = [
     {
-      text: 'User Management',
-      icon: <Group color={"secondary"}/>,
+      text: "Search",
+      icon: <Search/>,
+      path: "/search"
+    },
+    {
+      text: 'Users',
+      icon: <Group/>,
       path: '/users'
     },
     {
       text: "Webhooks",
-      icon: <Hub color={"secondary"}/>,
+      icon: <Hub/>,
       path: "/webhook"
     },
     {
       text: 'Event Logs',
-      icon: <Receipt color={"secondary"}/>,
+      icon: <Receipt/>,
       path: "/logs/events"
     },
     {
       text: 'Login Logs',
-      icon: <FindInPage color={"secondary"}/>,
+      icon: <FindInPage/>,
       path: "/logs/login"
     },
     {
       text: 'Retention Logs',
-      icon: <AcUnit color={"secondary"}/>,
+      icon: <AcUnit/>,
       path: "/logs/retention"
     },
     {
       text: 'Analytics',
-      icon: <BarChart color={"secondary"}/>,
+      icon: <BarChart/>,
       path: '/analytics'
     },
     {
       text: "Server Config",
-      icon: <Settings color={"secondary"}/>,
+      icon: <Settings/>,
       path: "/config"
     }
   ];
@@ -64,7 +69,10 @@ const KcDrawer = () => {
                   onClick={() => router.push(item.path)}
                   className={router.pathname == item.path ? styles.active : styles.non}
                   button>
-                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemIcon
+                    className={router.pathname == item.path ? styles.iconActive : styles.iconInactive}>
+                  {item.icon}
+                </ListItemIcon>
                 <ListItemText primary={item.text}/>
               </ListItem>
           ))}

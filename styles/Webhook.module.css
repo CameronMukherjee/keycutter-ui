@@ -1,3 +1,9 @@
 .textField {
   margin-bottom: 15px;
 }
+
+.fob {
+  position: absolute;
+  left: 97vw;
+  bottom: 5vh;
+}
