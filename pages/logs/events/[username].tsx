@@ -77,6 +77,15 @@ const EventsByUsername = () => {
       width: 300,
     },
     {
+      field: "metadata",
+      headerName: "Metadata",
+      description: "Any other information related to this event",
+      filterable: true,
+      sortable: true,
+      width: 300,
+      valueGetter: (params) => params.row.metadata || "NONE"
+    },
+    {
       field: 'createdAt',
       headerName: 'Created At',
       sortable: true,
@@ -85,9 +94,8 @@ const EventsByUsername = () => {
   ];
 
   return (
-      <KcPage title={"Event Logs"}>
-        <div style={{height: "100vh", width: "100%"}}>
-
+      <KcPage title={`Event Logs: ${query.username}`}>
+        <div style={{height: "100%"}}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}

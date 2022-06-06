@@ -2,7 +2,6 @@ import KcPage from "../component/KcPage";
 import Image from "next/image";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import {useEffect, useState} from "react";
-import {KcDataGridUserRow} from "../types/KcUser";
 import axios from "axios";
 
 const Webhook = () => {
@@ -85,7 +84,7 @@ const Webhook = () => {
 
   return (
       <KcPage title={"Webhook Management"}>
-        <div style={{height: "100vh", width: "100%"}}>
+        <div style={{height: '100%'}}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}

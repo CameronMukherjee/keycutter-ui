@@ -1,6 +1,5 @@
 import KcPage from "../../../component/KcPage";
 import {useEffect, useState} from "react";
-import {KcDataGridUserRow} from "../../../types/KcUser";
 import axios from "axios";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import Image from "next/image";
@@ -79,7 +78,7 @@ const LoginLogsByUsername = () => {
   ];
 
   return (
-      <KcPage title={"Login Logs"}>
+      <KcPage title={`Login Logs: ${query.username}`}>
         <div style={{height: "100vh", width: "100%"}}>
           {isLoading ?
               <Image

@@ -1,15 +1,6 @@
-import {Drawer, List, ListItem, ListItemIcon, ListItemText, Typography} from "@mui/material";
+import {Drawer, List, ListItem, ListItemIcon, ListItemText} from "@mui/material";
 import styles from '../styles/component/KcDrawer.module.css'
-import {
-  BarChart,
-  DocumentScanner,
-  FindInPage,
-  GraphicEq,
-  Group,
-  Home, Hub,
-  Receipt,
-  VerifiedUser
-} from "@mui/icons-material";
+import {AcUnit, BarChart, FindInPage, Group, Hub, Receipt, Settings,} from "@mui/icons-material";
 import {useRouter} from "next/router";
 
 const KcDrawer = () => {
@@ -20,11 +11,6 @@ const KcDrawer = () => {
       text: 'User Management',
       icon: <Group color={"secondary"}/>,
       path: '/users'
-    },
-    {
-      text: 'Analytics',
-      icon: <BarChart color={"secondary"}/>,
-      path: '/analytics'
     },
     {
       text: "Webhooks",
@@ -40,6 +26,21 @@ const KcDrawer = () => {
       text: 'Login Logs',
       icon: <FindInPage color={"secondary"}/>,
       path: "/logs/login"
+    },
+    {
+      text: 'Retention Logs',
+      icon: <AcUnit color={"secondary"}/>,
+      path: "/logs/retention"
+    },
+    {
+      text: 'Analytics',
+      icon: <BarChart color={"secondary"}/>,
+      path: '/analytics'
+    },
+    {
+      text: "Server Config",
+      icon: <Settings color={"secondary"}/>,
+      path: "/config"
     }
   ];
 
@@ -48,24 +49,21 @@ const KcDrawer = () => {
           className={styles.drawer}
           variant={"permanent"}
           anchor={"left"}
-          classes={{ paper: styles.drawer}}
+          classes={{paper: styles.drawer}}
       >
         {/*@ts-ignore*/}
         <div align={'center'} style={{paddingTop: 10}}>
-          {/*<Typography variant={"h4"}>*/}
-          {/*  KeyCutter UI*/}
-          {/*</Typography>*/}
           <h1>
-            KeyCutter UI
+            KeyCutter
           </h1>
         </div>
         <List>
           {menuItems.map(item => (
               <ListItem
-                key={item.text}
-                onClick={() => router.push(item.path)}
-                className={router.pathname == item.path ? styles.active : styles.non}
-                button>
+                  key={item.text}
+                  onClick={() => router.push(item.path)}
+                  className={router.pathname == item.path ? styles.active : styles.non}
+                  button>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.text}/>
               </ListItem>

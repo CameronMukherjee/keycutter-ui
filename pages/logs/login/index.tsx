@@ -78,7 +78,7 @@ const Login = () => {
 
   return (
       <KcPage title={"Login Logs"}>
-        <div style={{height: "100vh", width: "100%"}}>
+        <div style={{height: '100%'}}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}
