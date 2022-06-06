@@ -12,23 +12,34 @@ import {
   DialogContent,
   DialogContentText,
   Grid,
-  TextField
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
 } from "@mui/material";
 import {KcDataGridUserRow} from "../types/KcUser";
 import styles from '../styles/Users.module.css';
 import 'moment-timezone';
-import {useRouter} from "next/router";
+import {NextRouter, useRouter} from "next/router";
 import Moment from "react-moment";
 
 const Users = () => {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [pageNo, setPageNo] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [totalRows, setTotalRows] = useState(0);
 
+  // Modal State
   const [modalInformation, setModalInformation] = useState<KcDataGridUserRow>();
   const [modalViewable, setModalViewable] = useState(false);
+  const [username, setUsername] = useState('');
+  const [newRole, setNewRole] = useState('');
 
   // Fetches users on page load.
   useEffect(() => {
@@ -45,6 +56,18 @@ const Users = () => {
       console.log(err)
     })
   }, [pageNo, pageSize])
+
+  const handleNewRole = () => {
+    console.log(`http://localhost:7314/user/username/${username}/role/${newRole}`)
+    axios.post(`http://localhost:7314/user/username/${username}/role/${newRole}`)
+    .then(res => {
+      console.log(res);
+      router.reload();
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
 
   const columns: GridColDef[] = [
     {
@@ -127,22 +150,26 @@ const Users = () => {
                   page={pageNo}
                   onPageChange={(newPage) => setPageNo(newPage)}
                   onRowClick={(row) => {
+                    setUsername(row.row.username);
                     setModalViewable(true);
                     // @ts-ignore
                     setModalInformation(row);
-                    console.log(row);
                   }}
                   pagination
               />
           }
-          {modalViewable && UserModal(modalInformation, setModalViewable)}
+          {modalViewable && UserModal(modalInformation, setModalViewable, newRole, setNewRole, handleNewRole, router)}
         </div>
       </KcPage>
   )
 }
 
-const UserModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatch<SetStateAction<boolean>>) => {
-  const router = useRouter();
+const UserModal = (user: KcDataGridUserRow | undefined,
+                   isModalViewable: Dispatch<SetStateAction<boolean>>,
+                   newRole: string,
+                   setNewRole: Dispatch<SetStateAction<string>>,
+                   handleNewRole: () => void,
+                   router: NextRouter) => {
 
   const handleDisable = () => {
     // @ts-ignore
@@ -173,6 +200,18 @@ const UserModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatc
     axios.delete(`http://localhost:7314/user/username/${user.row.username}`)
     .then(res => {
       console.log(res)
+      router.reload();
+    })
+    .catch(err => {
+      console.log(err);
+    })
+  }
+
+  const handleRoleRemoval = (role: string) => {
+    // @ts-ignore
+    axios.delete(`http://localhost:7314/user/username/${user.row.username}/role/${role}`)
+    .then(res => {
+      console.log(res);
       router.reload();
     })
     .catch(err => {
@@ -283,6 +322,59 @@ const UserModal = (user: KcDataGridUserRow | undefined, isModalViewable: Dispatc
                     />
                   </Box>
                 </DialogContentText>
+
+                <Grid container component={"form"}>
+                  <Grid item md={9}>
+                    <TextField
+                        className={styles.textField}
+                        label={"New Role"}
+                        id={"newRole"}
+                        value={newRole}
+                        onChange={(e) => setNewRole(e.target.value)}
+                        fullWidth
+                    />
+                  </Grid>
+                  <Grid item md={3}>
+                    <Button type={"submit"} variant={"contained"} style={{width: '10vw', height: "80%", marginLeft: 30}}
+                            onClick={handleNewRole}>
+                      Add role
+                    </Button>
+                  </Grid>
+                </Grid>
+
+                <TableContainer>
+                  <Table sx={{minWidth: 650}} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align={"left"}>
+                          <Typography variant={"h5"}><b>Role</b></Typography>
+                        </TableCell>
+                        <TableCell align={"right"}>
+                          <Typography variant={"h5"}>-</Typography>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {user.row.roles && user.row.roles.length > 0 &&
+                          user.row.roles.map(row => (
+                              <>
+                                <TableRow key={row}>
+                                  <TableCell align={"left"}>
+                                    <Typography variant={"h6"}>{row}</Typography>
+                                  </TableCell>
+                                  <TableCell align={"right"}>
+                                    <Button variant={"contained"} color={"error"}
+                                            onClick={() => handleRoleRemoval(row)}>
+                                      Remove Role
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              </>
+                          ))
+                      }
+                    </TableBody>
+                  </Table>
+                </TableContainer>
                 {/*@ts-ignore*/}
                 <div align={"right"} style={{marginTop: 5}}>
                   <b>Updated: <Moment fromNow>{user.row.updatedAt}</Moment></b>
