@@ -323,7 +323,7 @@ const UserModal = (user: KcDataGridUserRow | undefined,
                   </Box>
                 </DialogContentText>
 
-                <Grid container component={"form"}>
+                <Grid container component={"form"} spacing={2}>
                   <Grid item md={9}>
                     <TextField
                         className={styles.textField}
@@ -335,7 +335,7 @@ const UserModal = (user: KcDataGridUserRow | undefined,
                     />
                   </Grid>
                   <Grid item md={3}>
-                    <Button type={"submit"} variant={"contained"} style={{width: '10vw', height: "80%", marginLeft: 30}}
+                    <Button type={"submit"} variant={"contained"} style={{width: '100%', height: "80%"}}
                             onClick={handleNewRole}>
                       Add role
                     </Button>
