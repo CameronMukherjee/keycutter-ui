@@ -27,6 +27,8 @@ import styles from '../styles/Webhook.module.css';
 import Moment from "react-moment";
 import 'moment-timezone';
 import {Add} from "@mui/icons-material";
+import KcTable from "../component/KcTable";
+import MissingImage from "../component/MissingImage";
 
 const Webhook = () => {
   const router = useRouter();
@@ -196,32 +198,39 @@ const Webhook = () => {
              onClick={() => setNewWebhookModalVisible(true)}>
           <Add/>
         </Fab>
-        <div style={{height: '100%'}}>
+        {/*@ts-ignore*/}
+        <div style={{height: '100%'}} align={'center'}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}
                   layout={"fill"}
                   alt={"A loading animation"}/>
               :
-              <DataGrid
-                  paginationMode={"server"}
-                  rows={webhooks}
-                  columns={columns}
-                  getRowId={(row) => row.uid}
-                  rowsPerPageOptions={[25, 50, 100]}
-                  rowCount={totalRows}
-                  pageSize={pageSize}
-                  onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                  page={pageNo}
-                  onPageChange={(newPage) => setPageNo(newPage)}
-                  onRowClick={(row) => {
-                    setModalViewable(true);
-                    setWebhookInfo(row.row);
-                    setEvents(row.row.registeredEvents);
-                    console.log(row.row)
-                  }}
-                  pagination
-              />
+              <>
+                {webhooks ?
+                    <DataGrid
+                        paginationMode={"server"}
+                        rows={webhooks}
+                        columns={columns}
+                        getRowId={(row) => row.uid}
+                        rowsPerPageOptions={[25, 50, 100]}
+                        rowCount={totalRows}
+                        pageSize={pageSize}
+                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                        page={pageNo}
+                        onPageChange={(newPage) => setPageNo(newPage)}
+                        onRowClick={(row) => {
+                          setModalViewable(true);
+                          setWebhookInfo(row.row);
+                          setEvents(row.row.registeredEvents);
+                          console.log(row.row)
+                        }}
+                        pagination
+                    />
+                    :
+                    <MissingImage/>
+                }
+              </>
           }
           {modalViewable && ViewWebhookModal(webhookInfo,
               handleNewRegisteredEvents,

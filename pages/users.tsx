@@ -26,6 +26,7 @@ import styles from '../styles/Users.module.css';
 import 'moment-timezone';
 import {NextRouter, useRouter} from "next/router";
 import Moment from "react-moment";
+import MissingImage from '../component/MissingImage';
 
 const Users = () => {
   const router = useRouter();
@@ -58,7 +59,6 @@ const Users = () => {
   }, [pageNo, pageSize])
 
   const handleNewRole = () => {
-    console.log(`http://localhost:7314/user/username/${username}/role/${newRole}`)
     axios.post(`http://localhost:7314/user/username/${username}/role/${newRole}`)
     .then(res => {
       console.log(res);
@@ -131,32 +131,39 @@ const Users = () => {
 
   return (
       <KcPage title={"User Management"}>
-        <div style={{height: '100%'}}>
+        {/*@ts-ignore*/}
+        <div style={{height: '100%'}} align={'center'}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}
                   layout={"fill"}
                   alt={"A loading animation"}/>
               :
-              <DataGrid
-                  paginationMode={"server"}
-                  rows={users}
-                  columns={columns}
-                  getRowId={(row) => row.userUid}
-                  rowsPerPageOptions={[25, 50, 100]}
-                  rowCount={totalRows}
-                  pageSize={pageSize}
-                  onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                  page={pageNo}
-                  onPageChange={(newPage) => setPageNo(newPage)}
-                  onRowClick={(row) => {
-                    setUsername(row.row.username);
-                    setModalViewable(true);
-                    // @ts-ignore
-                    setModalInformation(row);
-                  }}
-                  pagination
-              />
+              <>
+                {users ?
+                    <DataGrid
+                        paginationMode={"server"}
+                        rows={users}
+                        columns={columns}
+                        getRowId={(row) => row.userUid}
+                        rowsPerPageOptions={[25, 50, 100]}
+                        rowCount={totalRows}
+                        pageSize={pageSize}
+                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                        page={pageNo}
+                        onPageChange={(newPage) => setPageNo(newPage)}
+                        onRowClick={(row) => {
+                          setUsername(row.row.username);
+                          setModalViewable(true);
+                          // @ts-ignore
+                          setModalInformation(row);
+                        }}
+                        pagination
+                    />
+                    :
+                    <MissingImage/>
+                }
+              </>
           }
           {modalViewable && UserModal(modalInformation, setModalViewable, newRole, setNewRole, handleNewRole, router)}
         </div>

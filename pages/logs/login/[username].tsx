@@ -5,6 +5,7 @@ import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import Image from "next/image";
 import {useCookies} from "react-cookie";
 import {useRouter} from "next/router";
+import MissingImage from "../../../component/MissingImage";
 
 const LoginLogsByUsername = () => {
   const router = useRouter();
@@ -41,9 +42,17 @@ const LoginLogsByUsername = () => {
 
   const columns: GridColDef[] = [
     {
-      field: 'uid',
+      field: 'logUid',
       headerName: 'Login Log Uid',
       description: "The login logs unique identifier",
+      sortable: true,
+      filterable: true,
+      width: 300
+    },
+    {
+      field: 'userUid',
+      headerName: 'User Uid',
+      description: "The users logs unique identifier",
       sortable: true,
       filterable: true,
       width: 300
@@ -79,27 +88,34 @@ const LoginLogsByUsername = () => {
 
   return (
       <KcPage title={`Login Logs: ${query.username}`}>
-        <div style={{height: "100vh", width: "100%"}}>
+        {/*@ts-ignore*/}
+        <div style={{height: "100%"}} align={'center'}>
           {isLoading ?
               <Image
                   src={"/loading.gif"}
                   layout={"fill"}
                   alt={"A loading animation"}/>
               :
-              <DataGrid
-                  paginationMode={"server"}
-                  rows={logs}
-                  columns={columns}
-                  getRowId={(row) => row.uid}
-                  rowsPerPageOptions={[25, 50, 100]}
-                  rowCount={totalRows}
-                  pageSize={pageSize}
-                  onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                  page={pageNo}
-                  onPageChange={(newPage) => setPageNo(newPage)}
-                  onRowClick={(row) => console.log(row)}
-                  pagination
-              />
+              <>
+                {logs ?
+                    <DataGrid
+                        paginationMode={"server"}
+                        rows={logs}
+                        columns={columns}
+                        getRowId={(row) => row.logUid}
+                        rowsPerPageOptions={[25, 50, 100]}
+                        rowCount={totalRows}
+                        pageSize={pageSize}
+                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
+                        page={pageNo}
+                        onPageChange={(newPage) => setPageNo(newPage)}
+                        onRowClick={(row) => console.log(row)}
+                        pagination
+                    />
+                    :
+                    <MissingImage/>
+                }
+              </>
           }
         </div>
       </KcPage>
